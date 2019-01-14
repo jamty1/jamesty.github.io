@@ -1,0 +1,89 @@
+/* Page banner displayed at the top */
+#banner {
+	background: linear-gradient(to right, #1E5897, #219A5B 80%);
+	margin-top: 20px;
+	margin-bottom: 20px;
+	padding: 30px;
+	text-align: center;
+	font: bold 40px verdana;
+	color: white;
+}
+
+/* Input forms - text box and search button */
+#search-input {
+	width: 90%;
+	font-size: 20px;
+	border-radius: 1px;
+	padding: 20px;
+	border: 1px solid gray;
+	color: #484848;
+}
+#search-button {
+	cursor: pointer;
+	font-size: 30px;
+	background: #219A5B;
+	border: 1px solid #219A5B;
+	color: white;
+	margin-left: 20px;
+	box-shadow: 1px 1px #888888;
+	border-radius: 3px;
+	width: 5%;
+	padding: 10px;
+	padding-bottom: 15px;
+	transform: scaleX(-1);
+}
+#search-button:hover {
+	background-color: #148773;
+}
+#search-button:active {
+	background-color: #134340;
+}
+
+/* Displayed search results */
+.results {
+	font-size: 20px;
+	font-family: helvetica;
+	color: #181818;
+	vertical-align: top;
+	text-align: left;
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+table {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+ul, li {
+	padding: 5px;
+	margin: 0;
+}
+
+#results-title {
+	width: 40%;
+	font-size: 20px;
+}
+#results-body {
+	width: 60%;
+	font-size: 18px;
+}
+
+/* Favourites list */
+#favourites {
+	color: #219A5B;
+	font-weight: bold;
+	font-family: verdana;
+}
+
+/* Star color, active and inactive stars */
+#star{
+	color: gray;
+	padding-right: 15px;
+	font-size: 20px;
+}
+#star-active {
+	color: #219A5B;
+	padding-right: 15px;
+	font-size: 20px;
+}
