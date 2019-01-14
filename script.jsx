@@ -4,7 +4,7 @@ This class contains the json data as well as handles the inputs into the search 
 class SearchForm extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {data: [], results_title: [], results_body: []}
+		this.state = {data: [], search_results: []}
 		this.recordInput = this.recordInput.bind(this);
 		this.handleKeyPress = this.handleKeyPress.bind(this);
 		this.onSearch = this.onSearch.bind(this);
@@ -16,9 +16,6 @@ class SearchForm extends React.Component {
 			.then((response) => response.json())
 				.then((jsondata) => {
 					this.setState({data: jsondata});
-					for (var i = 0; i < this.state.data.length; i++) {
-						this.state.data[i].favourite = false;
-					}
 				});
 	}
 	
@@ -33,7 +30,7 @@ class SearchForm extends React.Component {
 	recordInput(event) {
 		this.setState({input: event.target.value.toLowerCase()}, () => {
 			if (this.state.input == "") {
-				this.setState({results_title: [], results_body: []});
+				this.setState({search_results: []});
 			}
 		});
 	}
@@ -41,15 +38,17 @@ class SearchForm extends React.Component {
 	// Searches the json data for keyword matches and updates the result states.
 	onSearch() {
 		var input = this.state.input;
-		var title = [];
-		var body = [];
+		var results = [];
 		this.state.data.map((item, key) => {
 			if (item.keywords.includes(input)) {
-				title.push(item.title);
-				body.push(item.body);
+				var newObject = {};
+				newObject.title = item.title;
+				newObject.body = item.body;
+				newObject.id = key;
+				results.push(newObject);
 			}
 		});
-		this.setState({results_title: title, results_body: body});
+		this.setState({search_results: results});
 	}
 	
 	render() {
@@ -59,7 +58,7 @@ class SearchForm extends React.Component {
 				<button type="button" id="search-button" onClick={this.onSearch}>
 					<i class="fa fa-search"></i>
 				</button>
-				<SearchResults results_title={this.state.results_title} results_body={this.state.results_body} />
+				<SearchResults results={this.state.search_results} />
 			</div>
 		);
 	}
@@ -71,13 +70,26 @@ This class handles displaying the search results.
 class SearchResults extends React.Component {
 	constructor(props) {
 		super(props);
-		this.state = {favourites: [], hasFavourite: false};
+		this.state = {favourites: [], hasFavourites: true};
 		this.addFavourite = this.addFavourite.bind(this);
 		this.removeInFavourites = this.removeInFavourites.bind(this);
 		this.checkInFavourites = this.checkInFavourites.bind(this);
 	}
 	
+	// Load list of favourites from cookies.
+	componentDidMount() {
+		var temp = {favourites: JSON.parse(Cookies.get().favourites)};
+		if (temp.favourites.length > 0) {
+			temp.hasFavourites = true;
+		} else {
+			temp.hasFavourites = false;
+		}
+		this.setState({favourites: temp.favourites, hasFavourites: temp.hasFavourites});
+	}
+	
 	// Decodes the given text as html.
+	// Solution as listed on this stackoverflow question:
+	// https://stackoverflow.com/questions/39758136/render-html-string-as-real-html-in-a-react-component
 	htmlDecode(text){
 		var div = document.createElement('div');
 		div.innerHTML = text;
@@ -86,8 +98,9 @@ class SearchResults extends React.Component {
 	
 	// Removes the given item in the list of favourites if it is favourited.
 	removeInFavourites(item) {
-		for (var i = 0; i < this.state.favourites.length; i++) {
-			if (this.state.favourites[i].title == item.title) {
+		var favouritesCount = this.state.favourites.length;
+		for (var i = 0; i < favouritesCount; i++) {
+			if (this.state.favourites[i].id == item.id) {
 				this.state.favourites.splice(i, 1);
 				return true;
 			}
@@ -97,8 +110,9 @@ class SearchResults extends React.Component {
 	
 	// Checks if the given item is in the list of favourites.
 	checkInFavourites(item) {
-		for (var i = 0; i < this.state.favourites.length; i++) {
-			if (this.state.favourites[i].title == item.title) {
+		var favouritesCount = this.state.favourites.length;
+		for (var i = 0; i < favouritesCount; i++) {
+			if (this.state.favourites[i].id == item.id) {
 				return true;
 			}
 		}
@@ -107,12 +121,10 @@ class SearchResults extends React.Component {
 	
 	// Adds a new favourite into the list of favourites.
 	// If the item is already a favourite, the item is removed instead.
-	addFavourite(title, body) {
-		var newObject = {};
-		newObject.title = title;
-		newObject.body = body;
-		if (!this.removeInFavourites(newObject)) {
-			this.state.favourites.push(newObject);
+	addFavourite(item) {
+		console.log(this.state);
+		if (!this.removeInFavourites(item)) {
+			this.state.favourites.push(item);
 		}
 		// Update the state to indicate that there are items in the list of favourites.
 		// This will be used to indicate whether we should render the favourites list or not.
@@ -121,6 +133,7 @@ class SearchResults extends React.Component {
 		} else {
 			this.setState({hasFavourites: false});
 		}
+		Cookies.set('favourites', this.state.favourites, {expires: 1});
 	}
 	
 	// Renders the results of the search.
@@ -130,22 +143,22 @@ class SearchResults extends React.Component {
 		return(
 			<div>
 			<table class="search" id="search-results">
-				{this.props.results_title.map((item, key) => 
+				{this.props.results.map((item, key) => 
 					<tr>
 						<td class="results" id="results-title">
-							{this.checkInFavourites({title: item, body: this.props.results_body[key]}) ?
-							<span id="star-active" onClick={() => this.addFavourite(item, this.props.results_body[key])}> &#x2605;</span>
-							: <span id="star" onClick={() => this.addFavourite(item, this.props.results_body[key])}> &#x2605;</span>}
-							{item}
+							{this.checkInFavourites(item) ?
+							<span id="star-active" onClick={() => this.addFavourite(item)}> &#x2605;</span>
+							: <span id="star" onClick={() => this.addFavourite(item)}> &#x2605;</span>}
+							{item.title}
 						</td>
 						<td class="results" id="results-body">
-							<span dangerouslySetInnerHTML={{__html: this.htmlDecode(this.props.results_body[key])}}></span>
+							<span dangerouslySetInnerHTML={{__html: this.htmlDecode(item.body)}}></span>
 						</td>
 					</tr>
 				)}
 			</table>
-			{this.state.hasFavourites ? <Favourites favourites={this.state.favourites} 
-				addFavourite={this.addFavourite} htmlDecode={this.htmlDecode}/> : null}
+			<Favourites favourites={this.state.favourites} addFavourite={this.addFavourite} htmlDecode={this.htmlDecode}/> 
+			{this.state.hasFavourites ? null : <span id="description"> You have no favourites. </span>}
 			</div>
 		);
 	}
@@ -167,7 +180,7 @@ class Favourites extends React.Component {
 				{this.props.favourites.map((item, key) =>
 					<tr>
 						<td class="results" id="results-title">
-							<span id="star-active" onClick={() => this.props.addFavourite(item.title, item.body)}>&#x2605;</span>
+							<span id="star-active" onClick={() => this.props.addFavourite(item)}>&#x2605;</span>
 							{item.title}
 						</td>
 						<td class="results" id="results-body">

@@ -76,14 +76,19 @@ ul, li {
 	font-family: verdana;
 }
 
+#description {
+	font-size: 20px;
+	font-family: verdana;
+}
+
 /* Star color, active and inactive stars */
 #star{
 	color: gray;
 	padding-right: 15px;
-	font-size: 20px;
+	font-size: 30px;
 }
 #star-active {
 	color: #219A5B;
 	padding-right: 15px;
-	font-size: 20px;
+	font-size: 30px;
 }
