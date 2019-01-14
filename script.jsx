@@ -78,13 +78,17 @@ class SearchResults extends React.Component {
 	
 	// Load list of favourites from cookies.
 	componentDidMount() {
-		var temp = {favourites: JSON.parse(Cookies.get().favourites)};
-		if (temp.favourites.length > 0) {
-			temp.hasFavourites = true;
-		} else {
-			temp.hasFavourites = false;
+		try {
+			var temp = {favourites: JSON.parse(Cookies.get().favourites)};
+			if (temp.favourites.length > 0) {
+				temp.hasFavourites = true;
+			} else {
+				temp.hasFavourites = false;
+			}
+			this.setState({favourites: temp.favourites, hasFavourites: temp.hasFavourites});
+		} catch(e) {
+			this.setState({favourites: [], hasFavourites: false});
 		}
-		this.setState({favourites: temp.favourites, hasFavourites: temp.hasFavourites});
 	}
 	
 	// Decodes the given text as html.
@@ -122,7 +126,6 @@ class SearchResults extends React.Component {
 	// Adds a new favourite into the list of favourites.
 	// If the item is already a favourite, the item is removed instead.
 	addFavourite(item) {
-		console.log(this.state);
 		if (!this.removeInFavourites(item)) {
 			this.state.favourites.push(item);
 		}
