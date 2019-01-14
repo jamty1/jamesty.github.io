@@ -84,11 +84,13 @@ ul, li {
 /* Star color, active and inactive stars */
 #star{
 	color: gray;
-	padding-right: 15px;
 	font-size: 30px;
+	cursor: pointer;
+	margin-right: 15px;
 }
 #star-active {
 	color: #219A5B;
-	padding-right: 15px;
 	font-size: 30px;
+	cursor: pointer;
+	margin-right: 15px;
 }
